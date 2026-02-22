@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  cutesy-bot:
+    build: .
+    container_name: cutesy_couples_bot
+    restart: always
+    env_file:
+      - .env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
