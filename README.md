@@ -69,4 +69,4 @@ pytest tests/
 
 Want this bot set up for your own Discord server but don't want to deal with the coding and cloud hosting?
 
-**Contact `doberkai` on Discord** and they can help set it up for you!
+**Contact `doberkai` on Discord** to help set it up for you!
