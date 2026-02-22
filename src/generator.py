@@ -1,4 +1,4 @@
-import google.generativeai as genai
+from google import genai
 import logging
 import json
 
@@ -6,9 +6,9 @@ logger = logging.getLogger(__name__)
 
 class MessageGenerator:
     def __init__(self, api_key: str):
-        genai.configure(api_key=api_key)
-        # Using 1.5 flash as requested
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.client = genai.Client(api_key=api_key)
+        # Using 2.5 flash as previous versions are deprecated or unsupported
+        self.model_name = 'gemini-2.5-flash'
 
     def generate_daily_message(self, notion_data: dict) -> str:
         # Check for empty state
@@ -43,7 +43,10 @@ class MessageGenerator:
             )
 
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=prompt
+            )
             return response.text.strip()
         except Exception as e:
             logger.error(f"Failed to generate message from Gemini: {e}")
