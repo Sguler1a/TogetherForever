@@ -65,6 +65,30 @@ To verify the Notion date filtering and Gemini generation logic without hitting 
 pytest tests/
 ```
 
+## Helpful Server Commands
+
+Once deployed on your Oracle Virtual Machine, you can use these commands to manage the bot:
+
+- **View Live Logs**: Check what the bot is thinking/doing right now.
+  ```bash
+  docker-compose logs -f
+  ```
+- **Edit Environment Variables**: To change the trigger time, timezone, or update your API keys.
+  ```bash
+  nano .env
+  ```
+  _(After saving in Nano, you must restart the bot. Run `docker-compose down` then `docker-compose up -d --build`)_
+- **Restart the Bot**: If you want to force it to run fresh.
+  ```bash
+  docker-compose restart
+  ```
+- **Update the Code**: If you make changes to your GitHub repo and need to pull them to the server.
+  ```bash
+  git pull
+  docker-compose build
+  docker-compose up -d
+  ```
+
 ## Need Help?
 
 Want this bot set up for your own Discord server but don't want to deal with the coding and cloud hosting?
