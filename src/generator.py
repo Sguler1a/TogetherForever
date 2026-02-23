@@ -1,6 +1,7 @@
 from google import genai
 import logging
 import json
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -30,15 +31,36 @@ class MessageGenerator:
                 "Just wish them a wonderful day and give them a short, sweet relationship encouragement."
             )
         else:
+            # Randomly select single items to prevent LLM primacy bias and ensure variety
+            affirmations = notion_data.get('affirmations', [])
+            selected_affirmation = random.choice(affirmations) if affirmations else None
+
+            health_quests = notion_data.get('health', [])
+            selected_health = random.choice(health_quests) if health_quests else None
+
+            all_activities = notion_data.get('online_activities', [])
+            short_activities = [a for a in all_activities if str(a.get('length', '')).lower() == 'short']
+            long_activities = [a for a in all_activities if str(a.get('length', '')).lower() == 'long']
+
+            selected_short = random.choice(short_activities) if short_activities else None
+            selected_long = random.choice(long_activities) if long_activities else None
+
+            selected_activities = []
+            if selected_short:
+                selected_activities.append(selected_short)
+            if selected_long:
+                selected_activities.append(selected_long)
+
             prompt = (
                 f"{system_instructions}\n\n"
                 "Here is the data for today. Use the affirmation and relationship health question as a guideline "
-                "or inspiration so the message feels slightly different each day.\n\n"
+                "or inspiration so the message feels slightly different each day. "
+                "For activities, suggest both the short and long options if provided.\n\n"
                 f"Upcoming Events: {json.dumps(notion_data.get('events', []))}\n"
                 f"Today's Reminders: {json.dumps(notion_data.get('reminders', []))}\n"
-                f"Inspiration/Affirmation: {json.dumps(notion_data.get('affirmations', []))}\n"
-                f"Relationship Check-in Question: {json.dumps(notion_data.get('health', []))}\n"
-                f"Online Activities Ideas: {json.dumps(notion_data.get('online_activities', []))}\n\n"
+                f"Inspiration/Affirmation: {json.dumps(selected_affirmation) if selected_affirmation else 'None'}\n"
+                f"Relationship Check-in Question: {json.dumps(selected_health) if selected_health else 'None'}\n"
+                f"Online Activities Ideas: {json.dumps(selected_activities) if selected_activities else 'None'}\n\n"
                 "Please synthesize this into a cohesive daily message."
             )
 
