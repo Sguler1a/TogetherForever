@@ -89,6 +89,28 @@ Once deployed on your Oracle Virtual Machine, you can use these commands to mana
   docker-compose up -d
   ```
 
+## Troubleshooting
+
+### Working Around Docker Container Issues
+
+If you see errors like `KeyError: 'ContainerConfig'` when trying to rebuild the bot, it may be because an older version of `docker-compose` is unable to overwrite a corrupted container state. Try these steps (replace IDs below with the ones specified in your error logs):
+
+```bash
+# 1. Force remove the specific broken container using its ID
+docker rm -f <CONTAINER_ID>
+
+# 2. Force remove the container's image
+docker rmi -f <IMAGE_ID>
+
+# 3. (Optional but recommended) Clean up Docker's build cache
+docker builder prune -f
+
+# 4. Try starting it up again!
+docker-compose up -d --build
+```
+
+_(Tip: If your server supports it, using `docker compose` (with a space) instead of `docker-compose` often avoids these legacy bugs!)_
+
 ## Need Help?
 
 Want this bot set up for your own Discord server but don't want to deal with the coding and cloud hosting?
