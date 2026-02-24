@@ -74,17 +74,27 @@ class NotionDataFetcher:
         if not db_id:
             return []
             
-        today = self._get_today_str()
+        today_str = self._get_today_str()
         try:
-            # Assuming reminders have a Date property, or a Done checkbox
+            # Fetch all reminders and filter by date range in python because Notion API 
+            # date filters can be finicky with start/end date ranges vs single dates
             response = self.notion.databases.query(
                 database_id=db_id,
                 filter={
                     "property": "Date",
-                    "date": {"equals": today}
+                    "date": {"is_not_empty": True}
                 }
             )
-            return self._parse_results(response.get("results", []), "Task")
+            
+            valid_reminders = []
+            for item in self._parse_results(response.get("results", []), "Task"):
+                start = item.get("date_start")
+                end = item.get("date_end") or start
+                
+                if start and start <= today_str and end >= today_str:
+                    valid_reminders.append(item)
+                
+            return valid_reminders
         except Exception as e:
             logger.error(f"Error fetching reminders: {e}")
             return []
@@ -158,6 +168,8 @@ class NotionDataFetcher:
                 date_obj = props["Date"].get("date")
                 if date_obj:
                     item["date"] = date_obj.get("start")
+                    item["date_start"] = date_obj.get("start")
+                    item["date_end"] = date_obj.get("end")
             
             # Check for Location text property (rich_text)
             if "Location" in props and props["Location"].get("type") == "rich_text":

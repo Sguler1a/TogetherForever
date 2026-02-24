@@ -6,7 +6,7 @@ from discord.ext import commands, tasks
 import pytz
 from dotenv import load_dotenv
 
-from src.notion_client import NotionDataFetcher
+from src.notion_api import NotionDataFetcher
 from src.generator import MessageGenerator
 
 # Setup Logging

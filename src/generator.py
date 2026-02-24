@@ -38,24 +38,21 @@ class MessageGenerator:
             selected_health = random.choice(health_quests) if health_quests else None
 
             all_activities = notion_data.get('online_activities', [])
-            short_activities = [a for a in all_activities if str(a.get('length', '')).lower() == 'short']
-            long_activities = [a for a in all_activities if str(a.get('length', '')).lower() == 'long']
-
-            selected_short = random.choice(short_activities) if short_activities else None
-            selected_long = random.choice(long_activities) if long_activities else None
-
+            
+            # Since there is no 'Length' property, just randomly select 2 activities to suggest
             selected_activities = []
-            if selected_short:
-                selected_activities.append(selected_short)
-            if selected_long:
-                selected_activities.append(selected_long)
+            if all_activities:
+                # Shuffle and pick up to 2
+                shuffled = list(all_activities)
+                random.shuffle(shuffled)
+                selected_activities = shuffled[:2]
 
             prompt = (
                 f"{system_instructions}\n\n"
                 "CRITICAL INSTRUCTIONS:\n"
                 "1. You MUST include every single piece of data provided below in your message.\n"
                 "2. If an affirmation or relationship question is provided, you must explicitly mention it.\n"
-                "3. If any online activities are provided (short or long), you MUST explicitly suggest ALL of them.\n"
+                "3. If any online activities are provided, you MUST explicitly suggest ALL of them.\n"
                 "4. Only after ensuring all data points are included should you embellish the message with your cute, bubbly tone.\n\n"
                 "Here is the data for today:\n"
                 f"Upcoming Events: {json.dumps(notion_data.get('events', []))}\n"
