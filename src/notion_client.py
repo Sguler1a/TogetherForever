@@ -51,7 +51,7 @@ class NotionDataFetcher:
             return []
         
         today = self._get_today_str()
-        future = self._get_future_date_str(4)
+        future = self._get_future_date_str(7)
         
         try:
             response = self.notion.databases.query(
