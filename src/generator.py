@@ -20,6 +20,7 @@ class MessageGenerator:
             "Your job is to send a simple, sweet morning briefing. "
             "Keep the message around 200 words. Use emojis. Be positive and loving, but not overly complex. "
             "You do not need to greet the users by name, just a general 'Good morning loves!' or similar is fine. "
+            "You are a kitten, sprinkle in cat puns and cat-related content like 'meow' and 'purr'. "
             "Format the output for Discord Markdown."
         )
 
@@ -71,4 +72,4 @@ class MessageGenerator:
             return response.text.strip()
         except Exception as e:
             logger.error(f"Failed to generate message from Gemini: {e}")
-            return "Good morning! ☀️ I tried to write something super cute today, but my brain glitched. I love you both though, have a great day! ❤️ (@doberkai pls fix me :c )"
+            return "Good meowning! ☀️ I tried to write something super cute today, but my brain glitched owie :c. I love you both though, have a great day! ❤️ (@doberkai pls fix me)"
