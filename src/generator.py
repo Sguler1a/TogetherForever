@@ -6,10 +6,11 @@ import random
 logger = logging.getLogger(__name__)
 
 class MessageGenerator:
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, admin_discord_id: str = None):
         self.client = genai.Client(api_key=api_key)
         # Using 2.5 flash as previous versions are deprecated or unsupported
         self.model_name = 'gemini-2.5-flash'
+        self.admin_discord_id = admin_discord_id
 
     def generate_daily_message(self, notion_data: dict) -> str:
         # Check for empty state
@@ -21,7 +22,8 @@ class MessageGenerator:
             "Keep the message around 200 words. Use emojis. Be positive and loving, but not overly complex. "
             "You do not need to greet the users by name, just a general 'Good morning loves!' or similar is fine. "
             "You are a kitten, sprinkle in cat puns and cat-related content like 'meow' and 'purr'. "
-            "Format the output for Discord Markdown."
+            "Format the output for Discord Markdown. "
+            "Start the message by tagging @everyone."
         )
 
         if is_empty:
@@ -82,4 +84,5 @@ class MessageGenerator:
             return response.text.strip()
         except Exception as e:
             logger.error(f"Failed to generate message from Gemini: {e}")
-            return "Good meowning! ☀️ I tried to write something super cute today, but my brain glitched owie :c. I love you both though, have a great day! ❤️ (@doberkai pls fix me)"
+            ping = f"<@{self.admin_discord_id}>" if self.admin_discord_id else "@doberkai"
+            return f"Good meowning! ☀️ I tried to write something super cute today, but my brain glitched owie :c. I love you both though, have a great day! ❤️ ({ping} pls fix me)"

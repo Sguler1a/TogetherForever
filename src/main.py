@@ -20,6 +20,7 @@ load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 DISCORD_CHANNEL_ID = int(os.getenv("DISCORD_CHANNEL_ID", 0))
 DISCORD_GUILD_ID = int(os.getenv("DISCORD_GUILD_ID", 0))
+ADMIN_DISCORD_ID = os.getenv("ADMIN_DISCORD_ID")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 GOOGLE_CREDENTIALS_PATH = os.getenv("GOOGLE_CREDENTIALS_PATH", "credentials.json")
@@ -45,7 +46,10 @@ data_fetcher = GoogleSheetsFetcher(
     sheet_id=GOOGLE_SHEET_ID, 
     timezone_str=TIMEZONE_STR
 )
-message_generator = MessageGenerator(api_key=GEMINI_API_KEY)
+message_generator = MessageGenerator(
+    api_key=GEMINI_API_KEY,
+    admin_discord_id=ADMIN_DISCORD_ID
+)
 
 # Discord Bot Setup
 intents = discord.Intents.default()
@@ -73,7 +77,8 @@ async def run_daily_workflow():
         return msg
     except Exception as e:
         logger.error(f"Workflow error: {e}")
-        return "Good morning! ☀️ Something went slightly wrong fetching your data today, but I hope you both have a fantastic day! ❤️"
+        admin_ping = f"<@{ADMIN_DISCORD_ID}>" if ADMIN_DISCORD_ID else "@doberkai"
+        return f"Good morning! ☀️ Something went slightly wrong fetching your data today, but I hope you both have a fantastic day! ❤️ ({admin_ping} pls fix me!)"
 
 def parse_date_to_string(date_input: str) -> str | None:
     try:
