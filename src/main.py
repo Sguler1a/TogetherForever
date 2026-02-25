@@ -3,8 +3,10 @@ import logging
 from datetime import datetime, time
 import discord
 from discord.ext import commands, tasks
+from discord import app_commands
 import pytz
 from dotenv import load_dotenv
+from dateutil import parser as date_parser
 
 from src.google_sheets_api import GoogleSheetsFetcher
 from src.generator import MessageGenerator
@@ -17,6 +19,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 DISCORD_CHANNEL_ID = int(os.getenv("DISCORD_CHANNEL_ID", 0))
+DISCORD_GUILD_ID = int(os.getenv("DISCORD_GUILD_ID", 0))
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 GOOGLE_CREDENTIALS_PATH = os.getenv("GOOGLE_CREDENTIALS_PATH", "credentials.json")
@@ -47,7 +50,19 @@ message_generator = MessageGenerator(api_key=GEMINI_API_KEY)
 # Discord Bot Setup
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix="!", intents=intents)
+
+class MyBot(commands.Bot):
+    async def setup_hook(self):
+        if DISCORD_GUILD_ID:
+            guild = discord.Object(id=DISCORD_GUILD_ID)
+            self.tree.copy_global_to(guild=guild)
+            await self.tree.sync(guild=guild)
+            logger.info(f"Slash commands synced to guild {DISCORD_GUILD_ID}")
+        else:
+            await self.tree.sync()
+            logger.info("Slash commands synced globally.")
+
+bot = MyBot(command_prefix="!", intents=intents)
 
 async def run_daily_workflow():
     """Fetches data from Google Sheets, runs it through Gemini, and returns the string message."""
@@ -59,6 +74,79 @@ async def run_daily_workflow():
     except Exception as e:
         logger.error(f"Workflow error: {e}")
         return "Good morning! ☀️ Something went slightly wrong fetching your data today, but I hope you both have a fantastic day! ❤️"
+
+def parse_date_to_string(date_input: str) -> str | None:
+    try:
+        parsed_date = date_parser.parse(date_input)
+        return parsed_date.strftime("%Y-%m-%d")
+    except ValueError:
+        return None
+
+@bot.tree.command(name="addevent", description="Add an event to the shared Google Sheets database")
+@app_commands.describe(name="The name of the event", date="The date of the event (e.g., YYYY-MM-DD or Month Day)", location="Optional location")
+async def add_event_cmd(interaction: discord.Interaction, name: str, date: str, location: str = ""):
+    parsed_date = parse_date_to_string(date)
+    if not parsed_date:
+        await interaction.response.send_message(f"Oops! I couldn't quite understand the date format for '{date}'. Could you try again using a format like YYYY-MM-DD or Month Day (e.g., March 1st)?", ephemeral=True)
+        return
+        
+    success = data_fetcher.add_event(name, parsed_date, location)
+    if success:
+        await interaction.response.send_message(f"✨ Successfully added event: **{name}** on {parsed_date}!", ephemeral=False)
+    else:
+        await interaction.response.send_message("❌ Failed to add event. Check the logs.", ephemeral=True)
+
+@bot.tree.command(name="addreminder", description="Add a reminder to the shared Google Sheets database")
+@app_commands.describe(task="The task description", start_date="Start date", end_date="Optional end date")
+async def add_reminder_cmd(interaction: discord.Interaction, task: str, start_date: str, end_date: str = ""):
+    parsed_start = parse_date_to_string(start_date)
+    if not parsed_start:
+         await interaction.response.send_message(f"Oops! I couldn't quite understand the start date format for '{start_date}'.", ephemeral=True)
+         return
+         
+    parsed_end = ""
+    if end_date:
+        parsed_end = parse_date_to_string(end_date)
+        if not parsed_end:
+            await interaction.response.send_message(f"Oops! I couldn't quite understand the end date format for '{end_date}'.", ephemeral=True)
+            return
+
+    success = data_fetcher.add_reminder(task, parsed_start, parsed_end)
+    if success:
+        await interaction.response.send_message(f"📝 Successfully added reminder: **{task}**!", ephemeral=False)
+    else:
+        await interaction.response.send_message("❌ Failed to add reminder. Check the logs.", ephemeral=True)
+
+@bot.tree.command(name="addaffirmation", description="Add an affirmation to the shared Google Sheets database")
+@app_commands.describe(quote="The affirmation quote")
+async def add_affirmation_cmd(interaction: discord.Interaction, quote: str):
+    success = data_fetcher.add_affirmation(quote)
+    if success:
+        await interaction.response.send_message(f"💖 Successfully added affirmation: \"{quote}\"", ephemeral=False)
+    else:
+        await interaction.response.send_message("❌ Failed to add affirmation. Check the logs.", ephemeral=True)
+
+@bot.tree.command(name="addhealth", description="Add a relationship health question")
+@app_commands.describe(question="The question to ask")
+async def add_health_cmd(interaction: discord.Interaction, question: str):
+    success = data_fetcher.add_health_question(question)
+    if success:
+        await interaction.response.send_message(f"🩺 Successfully added health question: \"{question}\"", ephemeral=False)
+    else:
+        await interaction.response.send_message("❌ Failed to add health question. Check the logs.", ephemeral=True)
+
+@bot.tree.command(name="addactivity", description="Add an online activity")
+@app_commands.describe(name="Activity name", length="Expected length of the activity")
+@app_commands.choices(length=[
+    app_commands.Choice(name="Short", value="Short"),
+    app_commands.Choice(name="Long", value="Long")
+])
+async def add_activity_cmd(interaction: discord.Interaction, name: str, length: app_commands.Choice[str]):
+    success = data_fetcher.add_online_activity(name, length.value)
+    if success:
+        await interaction.response.send_message(f"🎮 Successfully added {length.value.lower()} activity: **{name}**", ephemeral=False)
+    else:
+        await interaction.response.send_message("❌ Failed to add activity. Check the logs.", ephemeral=True)
 
 @bot.event
 async def on_ready():

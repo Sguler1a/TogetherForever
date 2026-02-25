@@ -175,3 +175,39 @@ class GoogleSheetsFetcher:
             "health": self.get_relationship_health(),
             "online_activities": self.get_online_activities()
         }
+
+    def _append_row_by_header(self, title, row_dict):
+        if not self.spreadsheet:
+            return False
+        try:
+            for ws in self.spreadsheet.worksheets():
+                if title.lower() in ws.title.lower():
+                    headers = ws.row_values(1)
+                    row_data = []
+                    for h in headers:
+                        row_data.append(row_dict.get(h, ""))
+                    ws.append_row(row_data)
+                    return True
+            logger.warning(f"Worksheet matching '{title}' not found for appending.")
+            return False
+        except Exception as e:
+            logger.error(f"Error appending to worksheet '{title}': {e}")
+            return False
+
+    def add_event(self, name: str, date: str, location: str = ""):
+        return self._append_row_by_header("Events", {"Name": name, "Date": date, "Location": location})
+
+    def add_reminder(self, task: str, start_date: str, end_date: str = ""):
+        # If no end_date provided, default to start_date or empty in sheet? 
+        # Notion usually defaults end date to empty if it's identical or not a range. 
+        # But we'll follow what the user provides.
+        return self._append_row_by_header("Reminders", {"Task": task, "Date": start_date, "End Date": end_date})
+
+    def add_affirmation(self, quote: str):
+        return self._append_row_by_header("Affirmations", {"Quote": quote})
+
+    def add_health_question(self, question: str):
+        return self._append_row_by_header("Health", {"Question": question})
+
+    def add_online_activity(self, name: str, length: str):
+        return self._append_row_by_header("Online Activities", {"Name": name, "Length": length})

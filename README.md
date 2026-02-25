@@ -7,6 +7,7 @@ An automated Discord bot designed to keep couples connected by synthesizing dail
 - 📅 **Smart Event Tracking:** Automatically pulls upcoming events and daily reminders from Notion databases.
 - 💖 **Relationship Building:** Integrates daily affirmations, relationship check-in questions, and online activity ideas to keep things fresh.
 - 🤖 **AI Synthesized Delivery:** Uses Google Gemini (1.5 Flash) to format data into a natural, cutesy, and positive morning message.
+- 💬 **Interactive Slash Commands:** Easily add new events, reminders, and activities directly from Discord using `/addevent`, `/addreminder`, etc.
 - ⏰ **Automated Scheduling:** Runs automatically at 08:00 AM (America/Toronto time) via `discord.ext.tasks`.
 - 🐳 **Dockerized:** Fully containerized for easy deployment on free-tier cloud platforms (like Oracle Cloud).
 
