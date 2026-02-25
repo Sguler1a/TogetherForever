@@ -1,22 +1,27 @@
 import pytest
 from src.generator import MessageGenerator
-import google.generativeai as genai
+from google import genai
 
-# Mock the GenerativeModel
+# Mock the response
 class MockResponse:
     def __init__(self, text):
         self.text = text
 
-class MockModel:
-    def generate_content(self, prompt):
-        if "no upcoming events" in prompt:
+# Mock the models service inside the client
+class MockModels:
+    def generate_content(self, model, contents):
+        if "no upcoming events" in contents:
             return MockResponse("Mocked empty state positive message 💖")
         return MockResponse("Mocked data synthesis message ✨")
 
+# Mock the Client
+class MockClient:
+    def __init__(self, api_key=None):
+        self.models = MockModels()
+
 @pytest.fixture
 def mock_genai(monkeypatch):
-    monkeypatch.setattr(genai, "configure", lambda api_key: None)
-    monkeypatch.setattr(genai, "GenerativeModel", lambda model_name: MockModel())
+    monkeypatch.setattr(genai, "Client", MockClient)
 
 def test_empty_state_generation(mock_genai):
     generator = MessageGenerator(api_key="dummy")

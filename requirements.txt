@@ -1,6 +1,7 @@
 discord.py>=2.3.2
-notion-client==2.2.1
-google-genai>=0.1.0
-python-dotenv>=1.0.1
-pytz>=2024.1
+python-dotenv>=1.0.0
+google-genai>=0.2.2
+gspread>=6.0.0
+google-auth>=2.27.0
+pytz>=2023.3.post1
 pytest>=8.0.2

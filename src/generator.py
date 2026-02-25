@@ -40,21 +40,31 @@ class MessageGenerator:
 
             all_activities = notion_data.get('online_activities', [])
             
-            # Since there is no 'Length' property, just randomly select 2 activities to suggest
             selected_activities = []
             if all_activities:
-                # Shuffle and pick up to 2
-                shuffled = list(all_activities)
-                random.shuffle(shuffled)
-                selected_activities = shuffled[:2]
+                short_activities = [a for a in all_activities if a.get('length', '').lower() == 'short']
+                long_activities = [a for a in all_activities if a.get('length', '').lower() == 'long']
+                
+                # Pick 1 short and 1 long if available
+                if short_activities:
+                    selected_activities.append(random.choice(short_activities))
+                if long_activities:
+                    selected_activities.append(random.choice(long_activities))
+                
+                # If we don't have one of each but have multiple of the other, just grab another to have 2 total
+                if len(selected_activities) == 1 and len(all_activities) > 1:
+                    remaining = [a for a in all_activities if a not in selected_activities]
+                    if remaining:
+                        selected_activities.append(random.choice(remaining))
 
             prompt = (
                 f"{system_instructions}\n\n"
                 "CRITICAL INSTRUCTIONS:\n"
                 "1. You MUST include every single piece of data provided below in your message.\n"
                 "2. If an affirmation or relationship question is provided, you must explicitly mention it.\n"
-                "3. If any online activities are provided, you MUST explicitly suggest ALL of them.\n"
-                "4. Only after ensuring all data points are included should you embellish the message with your cute, bubbly tone.\n\n"
+                "3. If any online activities are provided, you MUST explicitly suggest ALL of them. If their 'length' is provided, casually mention which one is a short activity and which one is a longer one.\n"
+                "4. You MUST format any information loaded from the sheet (Event Names, Task Names, Quotations, Activities) in **bold**.\n"
+                "5. Only after ensuring all data points are included should you embellish the message with your cute, bubbly tone.\n\n"
                 "Here is the data for today:\n"
                 f"Upcoming Events: {json.dumps(notion_data.get('events', []))}\n"
                 f"Today's Reminders: {json.dumps(notion_data.get('reminders', []))}\n"

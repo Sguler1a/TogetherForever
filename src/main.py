@@ -6,7 +6,7 @@ from discord.ext import commands, tasks
 import pytz
 from dotenv import load_dotenv
 
-from src.notion_api import NotionDataFetcher
+from src.google_sheets_api import GoogleSheetsFetcher
 from src.generator import MessageGenerator
 
 # Setup Logging
@@ -17,9 +17,10 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 DISCORD_CHANNEL_ID = int(os.getenv("DISCORD_CHANNEL_ID", 0))
-NOTION_TOKEN = os.getenv("NOTION_TOKEN")
-NOTION_PARENT_PAGE_ID = os.getenv("NOTION_PARENT_PAGE_ID")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+GOOGLE_CREDENTIALS_PATH = os.getenv("GOOGLE_CREDENTIALS_PATH", "credentials.json")
+GOOGLE_SHEET_ID = os.getenv("GOOGLE_SHEET_ID")
 
 TIMEZONE_STR = os.getenv("TIMEZONE", "America/Toronto")
 SCHEDULER_TIME = os.getenv("SCHEDULER_TIME", "08:00")
@@ -36,9 +37,9 @@ except Exception as e:
     daily_time = time(hour=8, minute=0, tzinfo=pytz.timezone("America/Toronto"))
 
 # Initialize clients
-notion_fetcher = NotionDataFetcher(
-    token=NOTION_TOKEN, 
-    parent_page_id=NOTION_PARENT_PAGE_ID, 
+data_fetcher = GoogleSheetsFetcher(
+    credentials_path=GOOGLE_CREDENTIALS_PATH, 
+    sheet_id=GOOGLE_SHEET_ID, 
     timezone_str=TIMEZONE_STR
 )
 message_generator = MessageGenerator(api_key=GEMINI_API_KEY)
@@ -49,10 +50,10 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 async def run_daily_workflow():
-    """Fetches data from Notion, runs it through Gemini, and returns the string message."""
+    """Fetches data from Google Sheets, runs it through Gemini, and returns the string message."""
     logger.info("Starting daily workflow extraction...")
     try:
-        data = notion_fetcher.fetch_all_data()
+        data = data_fetcher.fetch_all_data()
         msg = message_generator.generate_daily_message(data)
         return msg
     except Exception as e:
