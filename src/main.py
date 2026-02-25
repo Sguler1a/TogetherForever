@@ -87,53 +87,53 @@ def parse_date_to_string(date_input: str) -> str | None:
 async def add_event_cmd(interaction: discord.Interaction, name: str, date: str, location: str = ""):
     parsed_date = parse_date_to_string(date)
     if not parsed_date:
-        await interaction.response.send_message(f"Oops! I couldn't quite understand the date format for '{date}'. Could you try again using a format like YYYY-MM-DD or Month Day (e.g., March 1st)?", ephemeral=True)
+        await interaction.response.send_message(f"Meow? >_< I couldn't quite understand the date format for '{date}'. Could you try giving it to me like YYYY-MM-DD or Month Day (e.g., March 1st)? :3", ephemeral=True)
         return
         
     success = data_fetcher.add_event(name, parsed_date, location)
     if success:
-        await interaction.response.send_message(f"✨ Successfully added event: **{name}** on {parsed_date}!", ephemeral=False)
+        await interaction.response.send_message(f"✨ Purr-fect! =^._.^= Successfully added event: **{name}** on {parsed_date}! :3", ephemeral=False)
     else:
-        await interaction.response.send_message("❌ Failed to add event. Check the logs.", ephemeral=True)
+        await interaction.response.send_message("❌ Oh no! >_< My paws slipped and I failed to add the event. Please check the logs!", ephemeral=True)
 
 @bot.tree.command(name="addreminder", description="Add a reminder to the shared Google Sheets database")
 @app_commands.describe(task="The task description", start_date="Start date", end_date="Optional end date")
 async def add_reminder_cmd(interaction: discord.Interaction, task: str, start_date: str, end_date: str = ""):
     parsed_start = parse_date_to_string(start_date)
     if not parsed_start:
-         await interaction.response.send_message(f"Oops! I couldn't quite understand the start date format for '{start_date}'.", ephemeral=True)
+         await interaction.response.send_message(f"Meow? >_< I couldn't quite understand the start date format for '{start_date}'. Could you try giving it to me like YYYY-MM-DD or Month Day (e.g., March 1st)? :3", ephemeral=True)
          return
          
     parsed_end = ""
     if end_date:
         parsed_end = parse_date_to_string(end_date)
         if not parsed_end:
-            await interaction.response.send_message(f"Oops! I couldn't quite understand the end date format for '{end_date}'.", ephemeral=True)
+            await interaction.response.send_message(f"Meow? >_< I couldn't quite understand the end date format for '{end_date}'. Could you try giving it to me like YYYY-MM-DD or Month Day (e.g., March 1st)? :3", ephemeral=True)
             return
 
     success = data_fetcher.add_reminder(task, parsed_start, parsed_end)
     if success:
-        await interaction.response.send_message(f"📝 Successfully added reminder: **{task}**!", ephemeral=False)
+        await interaction.response.send_message(f"📝 Pawsome! Successfully added reminder: **{task}**! :3", ephemeral=False)
     else:
-        await interaction.response.send_message("❌ Failed to add reminder. Check the logs.", ephemeral=True)
+        await interaction.response.send_message("❌ Hiss! >_< I couldn't add that reminder. Check my logs!", ephemeral=True)
 
 @bot.tree.command(name="addaffirmation", description="Add an affirmation to the shared Google Sheets database")
 @app_commands.describe(quote="The affirmation quote")
 async def add_affirmation_cmd(interaction: discord.Interaction, quote: str):
     success = data_fetcher.add_affirmation(quote)
     if success:
-        await interaction.response.send_message(f"💖 Successfully added affirmation: \"{quote}\"", ephemeral=False)
+        await interaction.response.send_message(f"💖 Meow! Successfully added affirmation: \"{quote}\" =^._.^=", ephemeral=False)
     else:
-        await interaction.response.send_message("❌ Failed to add affirmation. Check the logs.", ephemeral=True)
+        await interaction.response.send_message("❌ Oh nyooo >_< I failed to add the affirmation. Check the logs please!", ephemeral=True)
 
 @bot.tree.command(name="addhealth", description="Add a relationship health question")
 @app_commands.describe(question="The question to ask")
 async def add_health_cmd(interaction: discord.Interaction, question: str):
     success = data_fetcher.add_health_question(question)
     if success:
-        await interaction.response.send_message(f"🩺 Successfully added health question: \"{question}\"", ephemeral=False)
+        await interaction.response.send_message(f"🩺 Purr-fect! Successfully added relationshiphealth question: \"{question}\" :3", ephemeral=False)
     else:
-        await interaction.response.send_message("❌ Failed to add health question. Check the logs.", ephemeral=True)
+        await interaction.response.send_message("❌ *Sad meow* >_< I failed to add the health question. Check the logs!", ephemeral=True)
 
 @bot.tree.command(name="addactivity", description="Add an online activity")
 @app_commands.describe(name="Activity name", length="Expected length of the activity")
@@ -144,9 +144,9 @@ async def add_health_cmd(interaction: discord.Interaction, question: str):
 async def add_activity_cmd(interaction: discord.Interaction, name: str, length: app_commands.Choice[str]):
     success = data_fetcher.add_online_activity(name, length.value)
     if success:
-        await interaction.response.send_message(f"🎮 Successfully added {length.value.lower()} activity: **{name}**", ephemeral=False)
+        await interaction.response.send_message(f"🎮 Pawsome job! Successfully added {length.value.lower()} activity: **{name}** =^._.^=", ephemeral=False)
     else:
-        await interaction.response.send_message("❌ Failed to add activity. Check the logs.", ephemeral=True)
+        await interaction.response.send_message("❌ Oh whiskers! >_< I couldn't add the activity. Check my logs!", ephemeral=True)
 
 @bot.event
 async def on_ready():

@@ -186,7 +186,11 @@ class GoogleSheetsFetcher:
                     row_data = []
                     for h in headers:
                         row_data.append(row_dict.get(h, ""))
-                    ws.append_row(row_data)
+                    ws.append_row(
+                        row_data,
+                        value_input_option="USER_ENTERED",
+                        insert_data_option="INSERT_ROWS"
+                    )
                     return True
             logger.warning(f"Worksheet matching '{title}' not found for appending.")
             return False
