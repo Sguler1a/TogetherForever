@@ -22,8 +22,7 @@ class MessageGenerator:
             "Keep the message around 200 words. Use emojis. Be positive and loving, but not overly complex. "
             "You do not need to greet the users by name, just a general 'Good morning loves!' or similar is fine. "
             "You are a kitten, sprinkle in cat puns and cat-related content like 'meow' and 'purr'. "
-            "Format the output for Discord Markdown. "
-            "Start the message by tagging @everyone."
+            "Format the output for Discord Markdown."
         )
 
         if is_empty:
@@ -81,7 +80,7 @@ class MessageGenerator:
                 model=self.model_name,
                 contents=prompt
             )
-            return response.text.strip()
+            return f"@everyone\n\n{response.text.strip()}"
         except Exception as e:
             logger.error(f"Failed to generate message from Gemini: {e}")
             ping = f"<@{self.admin_discord_id}>" if self.admin_discord_id else "@doberkai"
