@@ -12,9 +12,9 @@ class MessageGenerator:
         self.model_name = 'gemini-2.5-flash'
         self.admin_discord_id = admin_discord_id
 
-    def generate_daily_message(self, notion_data: dict) -> str:
+    def generate_daily_message(self, sheet_data: dict) -> str:
         # Check for empty state
-        is_empty = all(len(items) == 0 for items in notion_data.values())
+        is_empty = all(len(items) == 0 for items in sheet_data.values())
         
         system_instructions = (
             "You are a cutesy, bubbly, and positive bot for a private couple's Discord server. "
@@ -33,13 +33,13 @@ class MessageGenerator:
             )
         else:
             # Randomly select single items to prevent LLM primacy bias and ensure variety
-            affirmations = notion_data.get('affirmations', [])
+            affirmations = sheet_data.get('affirmations', [])
             selected_affirmation = random.choice(affirmations) if affirmations else None
 
-            health_quests = notion_data.get('health', [])
+            health_quests = sheet_data.get('health', [])
             selected_health = random.choice(health_quests) if health_quests else None
 
-            all_activities = notion_data.get('online_activities', [])
+            all_activities = sheet_data.get('online_activities', [])
             
             selected_activities = []
             if all_activities:
@@ -67,8 +67,8 @@ class MessageGenerator:
                 "4. You MUST format any information loaded from the sheet (Event Names, Task Names, Quotations, Activities) in **bold**.\n"
                 "5. Only after ensuring all data points are included should you embellish the message with your cute, bubbly tone.\n\n"
                 "Here is the data for today:\n"
-                f"Upcoming Events: {json.dumps(notion_data.get('events', []))}\n"
-                f"Today's Reminders: {json.dumps(notion_data.get('reminders', []))}\n"
+                f"Upcoming Events: {json.dumps(sheet_data.get('events', []))}\n"
+                f"Today's Reminders: {json.dumps(sheet_data.get('reminders', []))}\n"
                 f"Inspiration/Affirmation: {json.dumps(selected_affirmation) if selected_affirmation else 'None'}\n"
                 f"Relationship Check-in Question: {json.dumps(selected_health) if selected_health else 'None'}\n"
                 f"Online Activities Ideas: {json.dumps(selected_activities) if selected_activities else 'None'}\n\n"

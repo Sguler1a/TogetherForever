@@ -70,7 +70,8 @@ class GoogleSheetsFetcher:
              for ws in self.spreadsheet.worksheets():
                  if title.lower() in ws.title.lower():
                      # get_all_records returns list of dicts with headers as keys
-                     return ws.get_all_records()
+                     records = ws.get_all_records()
+                     return [{str(k).strip(): v for k, v in row.items()} for row in records]
              logger.warning(f"Worksheet matching '{title}' not found.")
              return []
         except Exception as e:
