@@ -123,7 +123,32 @@ class GoogleSheetsFetcher:
                     "date_start": start_date,
                     "date_end": end_date
                 })
-        return reminders
+    def get_upcoming_reminders(self):
+        records = self._get_worksheet_records("Reminders")
+        today = self._get_today_str()
+        
+        reminders = []
+        for row in records:
+            task = row.get("Task", "")
+            start_raw = str(row.get("Date", ""))
+            end_raw = str(row.get("End Date", ""))
+            
+            if not task or not start_raw:
+                 continue
+                 
+            start_date = self._parse_date(start_raw)
+            end_date = self._parse_date(end_raw) if end_raw else start_date
+            
+            # Check if end date is today or in the future
+            if end_date and end_date >= today:
+                reminders.append({
+                    "title": task,
+                    "date_start": start_date,
+                    "date_end": end_date
+                })
+        
+        # Sort by start date
+        return sorted(reminders, key=lambda x: x["date_start"] if x["date_start"] else "")
 
     def get_affirmations(self):
         records = self._get_worksheet_records("Affirmations")

@@ -168,6 +168,49 @@ async def today_manual_trigger(ctx):
     msg = await run_daily_workflow()
     await ctx.send(msg)
 
+@bot.command(name="upcoming")
+async def upcoming_cmd(ctx):
+    """Shows all future events and reminders."""
+    logger.info(f"Manual !upcoming trigger invoked by {ctx.author}")
+    await ctx.send("Fetching upcoming events and reminders... ✨")
+    
+    try:
+        events = data_fetcher.get_events()
+        reminders = data_fetcher.get_upcoming_reminders()
+    except Exception as e:
+        logger.error(f"Error fetching upcoming data: {e}")
+        await ctx.send("Oh no! >_< I couldn't fetch the upcoming events and reminders. Please check the logs!")
+        return
+
+    if not events and not reminders:
+        await ctx.send("There are no upcoming events or reminders! 🐾")
+        return
+        
+    response = "🗓️ **Upcoming Events & Reminders** 🗓️\n\n"
+    
+    if events:
+        response += "**Events:**\n"
+        for idx, ev in enumerate(events, 1):
+            date_str = ev.get('date', 'Unknown Date')
+            response += f"{idx}. **{ev['title']}** - {date_str}\n"
+        response += "\n"
+        
+    if reminders:
+        response += "**Reminders:**\n"
+        for idx, rm in enumerate(reminders, 1):
+            date_start = rm.get('date_start', 'Unknown Date')
+            date_end = rm.get('date_end', '')
+            date_str = date_start
+            if date_end and date_start != date_end:
+                date_str += f" to {date_end}"
+            response += f"{idx}. **{rm['title']}** - {date_str}\n"
+
+    # Send in chunks to avoid discord limits
+    chunks = [response[i:i+1900] for i in range(0, len(response), 1900)]
+    for chunk in chunks:
+        await ctx.send(chunk)
+
+
 @tasks.loop(time=daily_time)
 async def daily_checkin_loop():
     logger.info("Executing scheduled daily check-in loop.")
