@@ -186,20 +186,29 @@ async def upcoming_cmd(ctx):
         await ctx.send("There are no upcoming events or reminders! 🐾")
         return
         
+    def format_date(date_str):
+        if not date_str:
+            return ""
+        try:
+            date_obj = date_parser.parse(date_str)
+            return date_obj.strftime("%B %d, %Y").replace(" 0", " ")
+        except:
+            return date_str
+            
     response = "🗓️ **Upcoming Events & Reminders** 🗓️\n\n"
     
     if events:
         response += "**Events:**\n"
         for idx, ev in enumerate(events, 1):
-            date_str = ev.get('date', 'Unknown Date')
+            date_str = format_date(ev.get('date')) or 'Unknown Date'
             response += f"{idx}. **{ev['title']}** - {date_str}\n"
         response += "\n"
         
     if reminders:
         response += "**Reminders:**\n"
         for idx, rm in enumerate(reminders, 1):
-            date_start = rm.get('date_start', 'Unknown Date')
-            date_end = rm.get('date_end', '')
+            date_start = format_date(rm.get('date_start')) or 'Unknown Date'
+            date_end = format_date(rm.get('date_end'))
             date_str = date_start
             if date_end and date_start != date_end:
                 date_str += f" to {date_end}"
