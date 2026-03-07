@@ -30,6 +30,9 @@ class GoogleSheetsFetcher:
             else:
                  # Fallback for when credentials are passed directly as a JSON string in env
                  creds_dict = json.loads(self.credentials_path)
+                 # Fix escaped newlines in the private key so the PEM can be loaded
+                 if 'private_key' in creds_dict:
+                     creds_dict['private_key'] = creds_dict['private_key'].replace('\\n', '\n')
                  credentials = Credentials.from_service_account_info(
                      creds_dict, scopes=self.scopes
                  )
