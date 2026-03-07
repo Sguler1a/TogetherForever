@@ -80,7 +80,7 @@ class MessageGenerator:
                 model=self.model_name,
                 contents=prompt
             )
-            return f"@everyone\n\n{response.text.strip()}"
+            return f"@everyone **Remember to take your Meds and Supplements!**\n\n{response.text.strip()}"
         except Exception as e:
             logger.error(f"Failed to generate message from Gemini: {e}")
             ping = f"<@{self.admin_discord_id}>" if self.admin_discord_id else "@doberkai"
