@@ -123,6 +123,9 @@ class GoogleSheetsFetcher:
                     "date_start": start_date,
                     "date_end": end_date
                 })
+        
+        return reminders
+
     def get_upcoming_reminders(self):
         records = self._get_worksheet_records("Reminders")
         today = self._get_today_str()
